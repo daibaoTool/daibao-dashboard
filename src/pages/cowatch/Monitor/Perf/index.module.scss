@@ -1,0 +1,24 @@
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-lg;
+}
+
+.toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.title {
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.stats {
+  width: 100%;
+}
+
+.chartCard {
+  border-radius: $border-radius;
+}
