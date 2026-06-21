@@ -31,14 +31,12 @@ export interface CoWatchRoom {
   created_at: number;
   updated_at: number;
   member_count: number;
-}
-
-// ─── 邀请码 ────────────────────────────────────────────────────────────────────
-export interface InviteCode {
-  code: string;
-  used_count: number;
-  max_count: number;
-  grant_plan: string | null;
+  /** 当月 HLS 流量（字节），来自 segment_views 表 */
+  traffic_month: number;
+  /** 近 7 天 HLS 流量（字节） */
+  traffic_7d: number;
+  /** 今日 HLS 流量（字节） */
+  traffic_today: number;
 }
 
 // ─── Monitor：性能数据 ─────────────────────────────────────────────────────────

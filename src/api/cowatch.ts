@@ -3,7 +3,6 @@ import type {
   AdminInfo,
   CoWatchUser,
   CoWatchRoom,
-  InviteCode,
   ApiResponse,
 } from '@/types';
 
@@ -48,23 +47,4 @@ export async function deleteUserApi(userId: string): Promise<void> {
 export async function getRoomsApi(): Promise<CoWatchRoom[]> {
   const res = await adminRequest.get<ApiResponse<{ rooms: CoWatchRoom[] }>>('/cowatch/rooms');
   return res.data.data.rooms;
-}
-
-// ─── Invite Codes ──────────────────────────────────────────────────────────────
-
-export async function getInviteCodesApi(): Promise<InviteCode[]> {
-  const res = await adminRequest.get<ApiResponse<{ inviteCodes: InviteCode[] }>>('/cowatch/invite-codes');
-  return res.data.data.inviteCodes;
-}
-
-export async function createInviteCodeApi(params: {
-  code: string;
-  maxCount: number;
-  grantPlan?: string | null;
-}): Promise<void> {
-  await adminRequest.post('/cowatch/invite-codes', params);
-}
-
-export async function deleteInviteCodeApi(code: string): Promise<void> {
-  await adminRequest.delete(`/cowatch/invite-codes/${encodeURIComponent(code)}`);
 }

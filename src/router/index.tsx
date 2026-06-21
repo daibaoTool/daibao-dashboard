@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import PermissionGuard from '@/components/PermissionGuard';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import AppLayout from '@/components/AppLayout';
+import AdminLayout from '@/components/AdminLayout';
 
 const LoginPage = lazy(() => import('@/pages/Login'));
 const PerfPage = lazy(() => import('@/pages/cowatch/Monitor/Perf'));
@@ -11,8 +12,7 @@ const UsersBusinessPage = lazy(() => import('@/pages/cowatch/Business/Users'));
 const RoomsPage = lazy(() => import('@/pages/cowatch/Business/Rooms'));
 const TrafficPage = lazy(() => import('@/pages/cowatch/Business/Traffic'));
 const AdminUsersPage = lazy(() => import('@/pages/cowatch/Admin/Users'));
-const InviteCodesPage = lazy(() => import('@/pages/cowatch/Admin/InviteCodes'));
-
+const AdminRoomsPage = lazy(() => import('@/pages/cowatch/Admin/Rooms'));
 const Lazy = ({ children }: { children: React.ReactNode }) => (
   <Suspense fallback={<LoadingSpinner />}>{children}</Suspense>
 );
@@ -42,24 +42,19 @@ export default function AppRouter() {
           <Route path="business/rooms" element={<Lazy><RoomsPage /></Lazy>} />
           <Route path="business/traffic" element={<Lazy><TrafficPage /></Lazy>} />
 
-          {/* Admin（额外权限校验） */}
+          {/* Admin（额外权限校验）：二级 Tab 布局 */}
           <Route
-            path="admin/users"
+            path="admin"
             element={
               <PermissionGuard require="admin:cowatch">
-                <Lazy><AdminUsersPage /></Lazy>
+                <AdminLayout />
               </PermissionGuard>
             }
-          />
-          <Route
-            path="admin/invite-codes"
-            element={
-              <PermissionGuard require="admin:cowatch">
-                <Lazy><InviteCodesPage /></Lazy>
-              </PermissionGuard>
-            }
-          />
-
+          >
+            <Route path="users" element={<Lazy><AdminUsersPage /></Lazy>} />
+            <Route path="rooms" element={<Lazy><AdminRoomsPage /></Lazy>} />
+            <Route index element={<Navigate to="users" replace />} />
+          </Route>
           {/* 默认跳转 */}
           <Route index element={<Navigate to="business/users" replace />} />
         </Route>
