@@ -41,9 +41,7 @@ export default function LoginPage() {
     <div className={styles.page}>
       <div className={styles.card}>
         <div className={styles.header}>
-          <div className={styles.icon}>📊</div>
-          <h1 className={styles.title}>大盘</h1>
-          <p className={styles.subtitle}>CoWatch 内部运营平台</p>
+          <h1 className={styles.title}>CoWatch</h1>
         </div>
 
         <Form<LoginForm>
