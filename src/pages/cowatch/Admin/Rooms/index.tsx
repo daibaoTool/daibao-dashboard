@@ -1,10 +1,22 @@
 import { useMemo, useState } from 'react';
-import { Table, Input, Tag } from 'antd';
+import { Table, Input, Tag, Button, Modal, Select, message } from 'antd';
 import { useRequest } from 'ahooks';
-import { getRoomsApi } from '@/api/cowatch';
+import { getRoomsApi, setRoomPlanLevelApi } from '@/api/cowatch';
 import type { CoWatchRoom } from '@/types';
 import type { ColumnsType } from 'antd/es/table';
 import styles from './index.module.scss';
+
+const PLAN_LEVEL_OPTIONS = [
+  { value: 'free',      label: '过期（free）' },
+  { value: 'vip:basic', label: '普通会员（vip:basic）' },
+  { value: 'vip:pro',   label: '高级会员（vip:pro）' },
+];
+
+function planLevelTag(planLevel: string) {
+  if (planLevel === 'vip:pro')   return <Tag color="gold">vip:pro</Tag>;
+  if (planLevel === 'vip:basic') return <Tag color="blue">vip:basic</Tag>;
+  return <Tag color="red">free</Tag>;
+}
 
 /** 将字节数格式化为可读字符串 */
 function formatBytes(bytes: number): string {
@@ -18,7 +30,13 @@ function formatBytes(bytes: number): string {
 export default function AdminRoomsPage() {
   const [keyword, setKeyword] = useState('');
 
-  const { data: rooms = [], loading } = useRequest(getRoomsApi);
+  // 等级设置 Modal 状态
+  const [planModalOpen, setPlanModalOpen] = useState(false);
+  const [planTarget, setPlanTarget] = useState<CoWatchRoom | null>(null);
+  const [selectedPlan, setSelectedPlan] = useState<string>('free');
+  const [planLoading, setPlanLoading] = useState(false);
+
+  const { data: rooms = [], loading, refresh } = useRequest(getRoomsApi);
 
   const filtered = useMemo(() =>
     keyword
@@ -26,6 +44,27 @@ export default function AdminRoomsPage() {
       : rooms,
     [rooms, keyword],
   );
+
+  function openPlanModal(room: CoWatchRoom) {
+    setPlanTarget(room);
+    setSelectedPlan(room.plan_level ?? 'free');
+    setPlanModalOpen(true);
+  }
+
+  async function handlePlanConfirm() {
+    if (!planTarget) return;
+    setPlanLoading(true);
+    try {
+      await setRoomPlanLevelApi(planTarget.id, selectedPlan);
+      message.success(`房间「${planTarget.name}」等级已设置为 ${selectedPlan}`);
+      setPlanModalOpen(false);
+      refresh();
+    } catch {
+      message.error('设置失败，请重试');
+    } finally {
+      setPlanLoading(false);
+    }
+  }
 
   const columns: ColumnsType<CoWatchRoom> = [
     {
@@ -39,6 +78,19 @@ export default function AdminRoomsPage() {
       dataIndex: 'id',
       key: 'id',
       render: (id: string) => <code className={styles.roomId}>{id}</code>,
+    },
+    {
+      title: '等级',
+      dataIndex: 'plan_level',
+      key: 'plan_level',
+      width: 130,
+      filters: [
+        { text: 'vip:pro',   value: 'vip:pro' },
+        { text: 'vip:basic', value: 'vip:basic' },
+        { text: 'free',      value: 'free' },
+      ],
+      onFilter: (value, record) => record.plan_level === value,
+      render: (planLevel: string) => planLevelTag(planLevel),
     },
     {
       title: '成员数',
@@ -86,6 +138,16 @@ export default function AdminRoomsPage() {
       render: (ts: number) => new Date(ts).toLocaleString('zh-CN'),
       sorter: (a, b) => a.created_at - b.created_at,
     },
+    {
+      title: '操作',
+      key: 'action',
+      width: 110,
+      render: (_, record) => (
+        <Button size="small" onClick={() => openPlanModal(record)}>
+          设置等级
+        </Button>
+      ),
+    },
   ];
 
   return (
@@ -109,6 +171,27 @@ export default function AdminRoomsPage() {
         pagination={{ pageSize: 20 }}
         size="middle"
       />
+
+      {/* 设置房间等级 Modal */}
+      <Modal
+        title={`设置房间等级：${planTarget?.name ?? ''}`}
+        open={planModalOpen}
+        onOk={handlePlanConfirm}
+        onCancel={() => setPlanModalOpen(false)}
+        confirmLoading={planLoading}
+        okText="确认"
+        cancelText="取消"
+      >
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginTop: 8 }}>
+          <span>目标等级：</span>
+          <Select
+            value={selectedPlan}
+            onChange={setSelectedPlan}
+            options={PLAN_LEVEL_OPTIONS}
+            style={{ width: 220 }}
+          />
+        </div>
+      </Modal>
     </div>
   );
 }

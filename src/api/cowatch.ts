@@ -48,3 +48,12 @@ export async function getRoomsApi(): Promise<CoWatchRoom[]> {
   const res = await adminRequest.get<ApiResponse<{ rooms: CoWatchRoom[] }>>('/cowatch/rooms');
   return res.data.data.rooms;
 }
+
+/**
+ * 手动设置房间等级
+ * @param roomId   目标房间 ID
+ * @param planLevel 目标等级：'free' | 'vip:basic' | 'vip:pro'
+ */
+export async function setRoomPlanLevelApi(roomId: string, planLevel: string): Promise<void> {
+  await adminRequest.post(`/cowatch/rooms/${roomId}/plan-level`, { planLevel });
+}

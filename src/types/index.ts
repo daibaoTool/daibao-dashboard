@@ -37,6 +37,10 @@ export interface CoWatchRoom {
   traffic_7d: number;
   /** 今日 HLS 流量（字节） */
   traffic_today: number;
+  /** 房间当前等级：'free' | 'vip:basic' | 'vip:pro' */
+  plan_level: string;
+  /** 房间创建者 user_id */
+  owner_id: string | null;
 }
 
 // ─── Monitor：性能数据 ─────────────────────────────────────────────────────────

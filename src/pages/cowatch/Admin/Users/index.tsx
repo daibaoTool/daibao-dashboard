@@ -7,9 +7,22 @@ import type { ColumnsType } from 'antd/es/table';
 import styles from './index.module.scss';
 
 const PLAN_OPTIONS = [
+  { label: '高级会员（vip:pro）', value: 'vip:pro' },
   { label: '普通会员（vip:basic）', value: 'vip:basic' },
   { label: '测试账号（dev）', value: 'dev' },
 ];
+
+const PLAN_TAG_COLOR: Record<string, string> = {
+  'vip:pro': 'gold',
+  'vip:basic': 'blue',
+  'dev': 'purple',
+};
+
+const PLAN_LABEL: Record<string, string> = {
+  'vip:pro': '高级会员',
+  'vip:basic': '普通会员',
+  'dev': 'dev',
+};
 
 export default function AdminUsersPage() {
   const [keyword, setKeyword] = useState('');
@@ -17,7 +30,7 @@ export default function AdminUsersPage() {
     open: false,
     userId: '',
   });
-  const [selectedPlan, setSelectedPlan] = useState<string>('vip:basic');
+  const [selectedPlan, setSelectedPlan] = useState<string>('vip:pro');
 
   const { data: users = [], loading, refresh } = useRequest(getUsersApi);
 
@@ -78,7 +91,13 @@ export default function AdminUsersPage() {
       dataIndex: 'plans',
       key: 'plans',
       render: (plans: string[]) =>
-        plans.length ? plans.map((p) => <Tag key={p} color="blue">{p}</Tag>) : <span>—</span>,
+        plans.length
+          ? plans.map((p) => (
+              <Tag key={p} color={PLAN_TAG_COLOR[p] ?? 'default'}>
+                {PLAN_LABEL[p] ?? p}
+              </Tag>
+            ))
+          : <span>—</span>,
     },
     {
       title: '注册时间',
